@@ -1,0 +1,261 @@
+---
+title: "607 Projet1"
+author: "Chunmei Zhu"
+date: "September 21, 2017"
+
+output:
+  html_document:
+  css: ./lab.css
+highlight: pygments
+theme: cerulean
+pdf_document: default
+---
+
+#### Read in source file from my computer
+
+```{r}
+library(stringr)
+
+raw.data <- readLines("D:/CUNY_SPS_DA/607_Data_Aq/Projet1/source_file/tournamentinfo.txt")
+head(raw.data,10)
+
+nrow <-length(raw.data)  #Number of the row in the file
+
+```
+
+#### Check data from the source file 
+
+```{r}
+raw.data[5]
+raw.data[6]
+```
+
+## Get charactors from rows and check data in extraction 
+```{r}
+chars1 <- unlist(str_extract_all(raw.data[5], "[[:alnum:][:alnum:].*, ]{2,}"))
+chars1
+chars1[2] #get name
+length(chars1)
+
+chars2 <- unlist(str_extract_all(raw.data[6], "[[:alnum:][:alnum:].*, ]{2,}"))
+chars2
+chars2[1] #get location name
+length(chars2)
+
+```
+
+## Create two tables to store data from the source file
+### a vector "table1" for the row of player's id, name and record- a string as a list in factor type 
+### a vector "df" for the row of player's location and  - a string as a list in factor type 
+
+
+```{r}
+j <- 0
+k <- 0
+table1=c()
+df=c()
+
+for(i in 5:nrow) {
+    
+    remainder1 <- (i-2)%%3
+    remainder2 <- i%%3
+    
+    # Create table "table1":player's names
+    if(remainder1 == 0) {
+      j <-j+1
+      table1[j] <-data.frame(unlist(str_extract_all(raw.data[i], "[[:alnum:][:alnum:].*\\-?*//[:alnum:], ]{2,}")))
+    }
+    
+    # Create table "df":player's scores
+    else if(remainder2 == 0) {
+      k <- k+1
+      df[k] <-data.frame(unlist(str_extract_all(raw.data[i], "[[:alnum:][:alnum:].*, ]{2,}")))
+    }
+    else{ i<-i+1 } 
+}
+
+print(j) # number of player
+print(table1[j]) # last player info
+print(table1[[j]][1]) # last player's ID
+print(table1[[j]][2]) # last player's name
+
+#print(df[[k]]) # last player info
+print(df[[k]][1]) # last player's location
+print(df[[k]][4]) # last player's pre_Rtg
+
+```
+
+##Contrust a data frame to store the data we need from two vectors
+###create vectors for variables
+###clearn data
+
+```{r}
+Id=c()
+name=c()
+location=c()
+pre_Rtg=c()
+total=c()
+round1=c()
+round2=c()
+round3=c()
+round4=c()
+round5=c()
+round6=c()
+round7=c()
+
+for(i in 1:j){
+  
+  #create vectors for variables
+  Id[i] <- as.character(table1[[i]][1])
+  name[i] <- as.character(table1[[i]][2])
+  location[i] <- as.character(df[[i]][1])
+  pre_Rtg[i] <- as.character(df[[i]][4])
+  total[i]<- as.character(table1[[i]][3])
+  round1[i]<- as.character(table1[[i]][4])
+  round2[i]<- as.character(table1[[i]][5])
+  round3[i]<- as.character(table1[[i]][6])
+  round4[i]<- as.character(table1[[i]][7])
+  round5[i]<- as.character(table1[[i]][8])
+  round6[i]<- as.character(table1[[i]][9])
+  round7[i]<- as.character(table1[[i]][10])
+  
+  
+  #clear data
+  Id[i] <-as.numeric(as.character(str_replace_all(Id[i], pattern = " ", replacement = "")))
+  name[i] <-unlist(str_extract_all(name[i], "\\b[[:alpha:].*\\-?*\\>, ]{2,}"))
+  location[i] <-str_replace_all(location[i], pattern = " ", replacement = "")
+  pre_Rtg[i] <-as.numeric(as.character(unlist(str_extract_all(pre_Rtg[i],"[:digit:]+"))))
+  total[i]<-as.numeric(as.character(str_replace_all(total[i], pattern = " ", replacement = "")))
+  
+  round1[i] <-str_sub(round1[i], start= -2)
+  round1[i] <-as.numeric(as.character(str_replace_all(round1[i], pattern = " ", replacement = "")))
+  round2[i] <-str_sub(round2[i], start= -2)
+  round2[i] <-as.numeric(as.character(str_replace_all(round2[i], pattern = " ", replacement = "")))
+  round3[i] <-str_sub(round3[i], start= -2)
+  round3[i] <-as.numeric(as.character(str_replace_all(round3[i], pattern = " ", replacement = "")))
+  round4[i] <-str_sub(round4[i], start= -2)
+  round4[i] <-as.numeric(as.character(str_replace_all(round4[i], pattern = " ", replacement = "")))
+  round5[i] <-str_sub(round5[i], start= -2)
+  round5[i] <-as.numeric(as.character(str_replace_all(round5[i], pattern = " ", replacement = "")))
+  round6[i] <-str_sub(round6[i], start= -2)
+  round6[i] <-as.numeric(as.character(str_replace_all(round6[i], pattern = " ", replacement = "")))
+  round7[i] <-str_sub(round7[i], start= -2)
+  round7[i] <-as.numeric(as.character(str_replace_all(round7[i], pattern = " ", replacement = "")))
+}
+
+#Check data 
+head(name,1)
+head(location,1)
+head(pre_Rtg,1)
+head(total,1)
+head(round1,1)
+head(round2,1)
+head(round3,1)
+head(round4,1)
+head(round5,1)
+head(round6,1)
+head(round7,1)
+
+#Check special values
+head(Id,5)
+name[28]
+pre_Rtg[8]
+```
+
+###combining vectors into a data frame
+
+
+```{r}
+mydata <- data.frame(Id,name,location,pre_Rtg,total,round1,round2,round3,round4,round5,round6,round7)
+head(mydata,5)
+dim(mydata)
+str(mydata)
+
+```
+
+###Clear data type in mydata 
+
+```{r}
+  
+  mydata$Id <- as.numeric(as.character(mydata$Id ))
+  mydata$name <- as.character(mydata$name )
+  mydata$location <- as.character(mydata$location)
+  mydata$pre_Rtg <- as.numeric(as.character(mydata$pre_Rtg))
+  mydata$total<- as.numeric(as.character(mydata$total))
+  mydata$round1<- as.numeric(as.character(mydata$round1))
+  mydata$round2<- as.numeric(as.character(mydata$round2))
+  mydata$round3<- as.numeric(as.character(mydata$round3))
+  mydata$round4<- as.numeric(as.character(mydata$round4))
+  mydata$round5<- as.numeric(as.character(mydata$round5))
+  mydata$round6<- as.numeric(as.character(mydata$round6))
+  mydata$round7<- as.numeric(as.character(mydata$round7))
+  
+  str(mydata)
+  summary(mydata)
+  
+
+```
+
+## Replace values in each round by their pre_Rtg values
+
+```{r}
+for (i in 1:j){
+   r1 <- mydata$round1[i]
+   r2 <- mydata$round2[i]
+   r3 <- mydata$round3[i]
+   r4 <- mydata$round4[i]
+   r5 <- mydata$round5[i]
+   r6 <- mydata$round6[i]
+   r7 <- mydata$round7[i]
+
+  mydata$round1[i] <- mydata$pre_Rtg[r1] 
+  mydata$round2[i] <- mydata$pre_Rtg[r2]
+   mydata$round3[i] <- mydata$pre_Rtg[r3] 
+  mydata$round4[i] <- mydata$pre_Rtg[r4]
+   mydata$round5[i] <- mydata$pre_Rtg[r5] 
+  mydata$round6[i] <- mydata$pre_Rtg[r6]
+   mydata$round7[i] <- mydata$pre_Rtg[r7] 
+  
+}
+head(mydata)
+dim(mydata)
+
+```
+
+## Calculation of Average of scores of rounds
+###insert new column avg in mydata 
+###get sum of scores in each row and calculate the avg of each
+
+
+```{r}
+mydata["avg"] <- 0
+
+mydata[mydata=="" ]<-0
+
+for(i in 1:j){ 
+ colSums(mydata[,c(6,12)], na.rm = TRUE)
+
+mydata$avg[i] <-as.integer((mydata$round1[i]+mydata$round2[i]+mydata$round3[i]+mydata$round4[i]+mydata$round5[i]+ mydata$round6[i]+ mydata$round7[i])/7)
+
+}
+
+head(mydata$avg)
+head(mydata)
+
+```
+
+##Required outcome 
+  
+```{r}
+#outcome_string <- data.frame(mydata$name,mydata$location, mydata$total,mydata$pre_Rtg,mydata$avg)
+#summary(outcome)
+#head(outcome)
+
+outcome_string<- data.frame(paste(mydata$name,mydata$location, mydata$total,mydata$pre_Rtg,mydata$avg, sep = ","))
+head(outcome_string)
+
+write.table(outcome_string, "D:/CUNY_SPS_DA/607_Data_Aq/Projet1/mydata.txt", sep="\t")
+
+```
+
+Note 
